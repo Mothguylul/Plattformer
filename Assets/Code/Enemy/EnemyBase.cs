@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 public class EnemyBase : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class EnemyBase : MonoBehaviour
 
 	private int _damage = 0;
 
-	private int _speed = 0;
+	private float _speed = 0;
 
 	private EnemyState _currentState;
 
@@ -28,11 +29,15 @@ public class EnemyBase : MonoBehaviour
 
 	protected GameObject CurrentEnemy;
 
-	virtual protected int Speed
+	private System.Random _random = new System.Random();
+
+	virtual protected float Speed
 	{
 		get => _speed;
 		set => _speed = value;
 	}
+
+	private bool _isPatrolling;
 
 	virtual protected EnemyState CurrentState
 	{
@@ -53,12 +58,21 @@ public class EnemyBase : MonoBehaviour
 	}
 
 	// Update is called once per frame
-	void Update()
+	protected virtual void Update()
 	{
 		switch (CurrentState)
 		{
 			case EnemyState.Patrol:
-				StartCoroutine(Patrol());
+				if (_isPatrolling)
+				{
+					return;
+				}
+				else
+				{
+					_isPatrolling = true;
+					StartCoroutine(Patrol());
+
+				}
 				break;
 
 			case EnemyState.Chase:
@@ -70,6 +84,9 @@ public class EnemyBase : MonoBehaviour
 				break;
 
 		}
+
+		if (CurrentState != EnemyState.Patrol)
+			_isPatrolling = false;
 	}
 
 
@@ -97,8 +114,8 @@ public class EnemyBase : MonoBehaviour
 				CurrentEnemy.transform.position = Vector2.MoveTowards(
 					CurrentEnemy.transform.position,
 					nextTargetPoint.transform.position,
-					Speed * Time.deltaTime
-				);
+					  Speed * Time.deltaTime
+				); 
 
 				if ((CurrentEnemy.transform.position - nextTargetPoint.transform.position).magnitude < 0.1f) //check if the distance between the enemy and the first target point is low, same as Vector.Distance()
 				{
@@ -107,10 +124,7 @@ public class EnemyBase : MonoBehaviour
 					nextTargetPoint = (nextTargetPoint == EnemyFirstPosition) ? EnemySecondPosition : EnemyFirstPosition;
 				}
 			}
-			else if (nextTargetPoint == null)
-			{
-				nextTargetPoint = EnemyFirstPosition.transform;
-			}
+			yield return null;	
 		}
 	}
 

@@ -6,21 +6,21 @@ using UnityEngine;
 
 public class LunaticCultistBase : EnemyBase
 {
-    private Animator _enemyAnimator;
+	private Animator _enemyAnimator;
 	private Rigidbody2D _enemyRigidbody;
 	private SpriteRenderer _enemySpriteRenderer;
-	
+
 
 	// Start is called before the first frame update
 	void Start()
-    {
-        _enemyAnimator = GetComponent<Animator>();
+	{
+		_enemyAnimator = GetComponent<Animator>();
 		_enemyRigidbody = GetComponent<Rigidbody2D>();
 		_enemySpriteRenderer = GetComponent<SpriteRenderer>();
 
 		base.Health = 20;
 		base.Damage = 10;
-		base.Speed = 10;
+		base.Speed = 4f;
 		base.CurrentEnemy = this.gameObject;
 
 		base.CurrentState = EnemyState.Patrol;
@@ -28,11 +28,13 @@ public class LunaticCultistBase : EnemyBase
 		CurrentEnemy = this.gameObject;
 
 
-    }
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
+	// Update is called once per frame
+	protected override void Update()
+	{
+		base.Update();
+
 		if (base.Health <= 0)
 			Die();
 
@@ -78,5 +80,5 @@ public class LunaticCultistBase : EnemyBase
 		base.Die();
 	}
 
-	
+
 }
