@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 	private SpriteRenderer playerSpriteRenderer;
 	private Rigidbody2D playerRigidBody;
 	private Animator playerAnimator;
+	private TrailRenderer _playerTrailrenderer;
 
 	[Header("Movement")]
 	private bool isGround;
@@ -29,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
 		playerRigidBody = GetComponent<Rigidbody2D>();
 		playerSpriteRenderer = GetComponent<SpriteRenderer>();
 		playerAnimator = GetComponent<Animator>();
+		_playerTrailrenderer = GetComponent<TrailRenderer>();
 	}
 
 	// Update is called once per frame
@@ -38,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
 		var dashingInput = Input.GetButtonDown("Dash");
 		dashingCooldown -= Time.deltaTime;
 
-		//dasing
+		//dashing
 		if (dashingInput && _canDash && dashingCooldown <= 0)
 		{
 			_isDashing = true;
@@ -55,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
 		if (_isDashing)
 		{
 			playerRigidBody.velocity = _dashingDirection.normalized * _dashingVelocity;
-			//playerTrailRenderer.emitting = true;
+			_playerTrailrenderer.emitting = true;
 			return;
 
 		}
@@ -108,7 +110,7 @@ public class PlayerMovement : MonoBehaviour
 		dashingCooldown = 1.25f;
 		_isDashing = false;
 		yield return new WaitForSeconds(0.2f);
-		//playerTrailRenderer.emitting = false;
+		_playerTrailrenderer.emitting = false;
 	}
 
 	// ground management

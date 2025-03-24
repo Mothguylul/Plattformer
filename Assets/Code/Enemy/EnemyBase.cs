@@ -76,7 +76,7 @@ public class EnemyBase : MonoBehaviour
 				break;
 
 			case EnemyState.Chase:
-				MoveTowardsPlayer();
+
 				break;
 
 			case EnemyState.Attack:
@@ -127,6 +127,7 @@ public class EnemyBase : MonoBehaviour
 			yield return null;	
 		}
 	}
+
 
 	protected virtual void Rest()
 	{
