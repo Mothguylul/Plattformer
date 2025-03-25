@@ -10,6 +10,12 @@ public class LunaticCultistBase : EnemyBase
 	private Rigidbody2D _enemyRigidbody;
 	private SpriteRenderer _enemySpriteRenderer;
 
+	private bool playerInRange = false;
+
+	[Header("Raycasts")]
+	[SerializeField] private Transform _rayCastStartingPosition;
+	private float _angle = 15f;
+	private float _rayLenght = 10f;
 
 	// Start is called before the first frame update
 	void Start()
@@ -21,7 +27,10 @@ public class LunaticCultistBase : EnemyBase
 		base.Health = 20;
 		base.Damage = 10;
 		base.Speed = 4f;
+		base.AttackRange = 15f;
 		base.CurrentEnemy = this.gameObject;
+		base.EnemySpriteRenderer = _enemySpriteRenderer;
+		base.EnemyRigidBody = _enemyRigidbody;
 
 		base.CurrentState = EnemyState.Patrol;
 
@@ -38,18 +47,38 @@ public class LunaticCultistBase : EnemyBase
 		if (base.Health <= 0)
 			Die();
 
-		if (playerInRange)
-		{
+		Vector2 forward = transform.right;
 
-			if (PlayerTransform.position.x < this.gameObject.transform.position.x)
+		Vector2[] directions = new Vector2[]
+		{
+			forward,
+		   base.RotateVector(forward, _angle),
+		   base.RotateVector(forward, -_angle),
+		   base.RotateVector(forward, _angle / 2),
+		   base.RotateVector(forward, -_angle / 2)
+		};
+
+		foreach (var direction in directions)
+		{
+			RaycastHit2D ray = Physics2D.Raycast(_rayCastStartingPosition.position, direction, _rayLenght);
+
+			if (ray.collider != null)
 			{
-				_enemySpriteRenderer.flipX = true;
+				if (ray.collider.CompareTag("Player"))
+				{
+					CurrentState = EnemyState.Chase;
+				}
 			}
-			else
-			{
-				_enemySpriteRenderer.flipX = false;
-			}
+
+			Debug.DrawRay(_rayCastStartingPosition.position, direction * _rayLenght, Color.red);
 		}
+
+
+		if (_enemyRigidbody.velocity.x > 0.01f)
+			_enemySpriteRenderer.flipX = true;
+		else if (_enemyRigidbody.velocity.x < -0.01f)
+			_enemySpriteRenderer.flipX = false;
+
 	}
 
 	//hit and damage logic
@@ -68,6 +97,7 @@ public class LunaticCultistBase : EnemyBase
 
 	}
 
+
 	//death logic
 	protected override void Die()
 	{
@@ -79,6 +109,5 @@ public class LunaticCultistBase : EnemyBase
 	{
 		base.Die();
 	}
-
 
 }

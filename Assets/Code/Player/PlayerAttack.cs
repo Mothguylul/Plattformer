@@ -12,6 +12,7 @@ public class PlayerAttackSystem : MonoBehaviour
 	private float attackTimer;
 	private int direction;
 	[SerializeField] private BoxCollider2D hitBox;
+	private bool isGround;
 
 	private int numberOfCicks;
 	private float lastClickTime;
@@ -34,7 +35,7 @@ public class PlayerAttackSystem : MonoBehaviour
 			numberOfCicks = 0;
 		}
 
-		if (playerRigidBody.velocity.y == 0 && playerRigidBody.velocity.x == 0)
+		if (isGround && playerRigidBody.velocity.x == 0)
 		{
 
 			if (Input.GetMouseButtonDown(0))
@@ -50,6 +51,7 @@ public class PlayerAttackSystem : MonoBehaviour
 
 		if (playerRigidBody.velocity.y > 0.01)
 		{
+			CancelGroundAttack();
 
 			if (Input.GetMouseButtonDown(0) && attackTimer <= 0)
 			{
@@ -77,6 +79,14 @@ public class PlayerAttackSystem : MonoBehaviour
 
 	}
 
+	private void CancelGroundAttack()
+	{
+		DeactivateHitBox();
+		playerAnimator.ResetTrigger("Attack1");
+		playerAnimator.ResetTrigger("Attack2");
+
+	}
+
 	void ActiveHitbox()
 	{
 		hitBox.gameObject.SetActive(true);
@@ -94,5 +104,24 @@ public class PlayerAttackSystem : MonoBehaviour
 		Invoke("DeactivateHitBox", 0.5f);
 		playerRigidBody.AddForce(new Vector2(direction * 7, 4), ForceMode2D.Impulse);
 		attackTimer = 1;
+	}
+
+
+	// ground management
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		if (collision.gameObject.CompareTag("IsGround"))
+		{
+			isGround = true;
+		}
+
+	}
+
+	private void OnCollisionExit2D(Collision2D collision)
+	{
+		if (collision.gameObject.CompareTag("IsGround"))
+		{
+			isGround = false;
+		}
 	}
 }

@@ -15,13 +15,11 @@ public class EnemyBase : MonoBehaviour
 
 	private float _speed = 0;
 
+	private float _attackRange = 0;
+
 	private EnemyState _currentState;
 
 	[Header("Movement elements")]
-
-	protected bool playerInRange = false;
-
-	[SerializeField] protected CapsuleCollider2D SpotRange; // the range the enemy will be able to see the player 
 
 	[SerializeField] protected Transform PlayerTransform;
 
@@ -29,7 +27,18 @@ public class EnemyBase : MonoBehaviour
 
 	protected GameObject CurrentEnemy;
 
-	private System.Random _random = new System.Random();
+	protected SpriteRenderer EnemySpriteRenderer;
+
+	protected Rigidbody2D EnemyRigidBody;
+
+	[Header("Others")]
+	[SerializeField] private GameObject _player;
+
+	virtual protected float AttackRange
+	{
+		get => _attackRange;
+		set => _attackRange = value;
+	}
 
 	virtual protected float Speed
 	{
@@ -76,17 +85,24 @@ public class EnemyBase : MonoBehaviour
 				break;
 
 			case EnemyState.Chase:
-
+				StopCoroutine(Patrol());
+				
 				break;
 
 			case EnemyState.Attack:
-				Attack();
 				break;
 
 		}
-
+		
 		if (CurrentState != EnemyState.Patrol)
 			_isPatrolling = false;
+
+		/*if ((CurrentEnemy.transform.position - _player.transform.position).magnitude < AttackRange)
+		{
+			Debug.Log("Attack state");
+			CurrentState = EnemyState.Attack;
+		}*/
+
 	}
 
 
@@ -94,13 +110,6 @@ public class EnemyBase : MonoBehaviour
 	{
 		Health -= damageTotake;
 	}
-
-	protected virtual void MoveTowardsPlayer()
-	{
-
-	}
-
-	protected virtual void Attack() { } //Empty, will be set in each enemy class individually
 
 	protected virtual IEnumerator Patrol()
 	{
@@ -110,12 +119,11 @@ public class EnemyBase : MonoBehaviour
 		{
 			if (nextTargetPoint != null)
 			{
-				Debug.Log("move enemy");
 				CurrentEnemy.transform.position = Vector2.MoveTowards(
 					CurrentEnemy.transform.position,
 					nextTargetPoint.transform.position,
 					  Speed * Time.deltaTime
-				); 
+				);
 
 				if ((CurrentEnemy.transform.position - nextTargetPoint.transform.position).magnitude < 0.1f) //check if the distance between the enemy and the first target point is low, same as Vector.Distance()
 				{
@@ -124,14 +132,22 @@ public class EnemyBase : MonoBehaviour
 					nextTargetPoint = (nextTargetPoint == EnemyFirstPosition) ? EnemySecondPosition : EnemyFirstPosition;
 				}
 			}
-			yield return null;	
+			yield return null;
 		}
 	}
 
-
-	protected virtual void Rest()
+	/// <summary>
+	/// Helper method to rotate vectors 
+	/// </summary>
+	/// <param name="v"></param>
+	/// <param name="degrees"></param>
+	/// <returns></returns>
+	protected virtual Vector2 RotateVector(Vector2 v, float degrees)
 	{
-
+		float radians = degrees * Mathf.Deg2Rad;
+		float cos = Mathf.Cos(radians);
+		float sin = Mathf.Sin(radians);
+		return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
 	}
 
 	protected virtual void Die()
@@ -139,21 +155,8 @@ public class EnemyBase : MonoBehaviour
 		Destroy(this.gameObject);
 
 	}
-	protected virtual void OnTriggerEnter2D(Collider2D collision)
-	{
-		if (collision.CompareTag("Player"))
-		{
-			playerInRange = true;
-		}
-	}
 
-	protected virtual void OnTriggerExit2D(Collider2D collision)
-	{
-		if (collision.CompareTag("Player"))
-		{
-			playerInRange = false;
-		}
-	}
-
-
+	// empty methods that will be set in each enemy individually
+	protected virtual void Chase() { }
+	protected virtual void Attack() { } 
 }
