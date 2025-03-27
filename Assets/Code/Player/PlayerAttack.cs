@@ -87,15 +87,9 @@ public class PlayerAttackSystem : MonoBehaviour
 
 	}
 
-	void ActiveHitbox()
-	{
-		hitBox.gameObject.SetActive(true);
-	}
+	void ActiveHitbox() => hitBox.gameObject.SetActive(true);
 
-	private void DeactivateHitBox()
-	{
-		hitBox.gameObject.SetActive(false);
-	}
+	private void DeactivateHitBox() => hitBox.gameObject.SetActive(false);
 
 	void JumpAttack()
 	{

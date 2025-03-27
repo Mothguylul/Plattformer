@@ -1513,6 +1513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba0e66d915cac0d498e8ed61ba7c8d28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hitBox: {fileID: 828834609}
   speed: 5
   _dashingVelocity: 10
   dashingTime: 0.1

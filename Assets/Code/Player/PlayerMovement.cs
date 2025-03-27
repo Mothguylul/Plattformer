@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 	private SpriteRenderer playerSpriteRenderer;
 	private Rigidbody2D playerRigidBody;
 	private Animator playerAnimator;
+	[SerializeField]private Collider2D _hitBox;
 	//private TrailRenderer _playerTrailrenderer;
 
 	[Header("Movement")]
@@ -40,10 +41,9 @@ public class PlayerMovement : MonoBehaviour
 		dashingCooldown -= Time.deltaTime;
 		var dashingInput = Input.GetButtonDown("Dash");
 
-
 		HandleJumping();
 		HandleMovementAndAnimation();
-		SpriteFlipping();	
+		SpriteFlippingAndHitbox();	
 		
 		//dashing
 		if (dashingInput && _canDash && dashingCooldown <= 0)
@@ -65,16 +65,22 @@ public class PlayerMovement : MonoBehaviour
 		if (isGround) { _canDash = true; }
 	}
 
-	private void SpriteFlipping()
+	private void SpriteFlippingAndHitbox()
 	{
+		float offsetX = Mathf.Abs(_hitBox.transform.localPosition.x);
+
 		if (xdirection > 0.01)
 		{
 			playerSpriteRenderer.flipX = false;
+			_hitBox.transform.localPosition = new Vector2(offsetX, _hitBox.transform.localPosition.y);
+
 		}
 		else if (xdirection < -0.01)
 		{
 			playerSpriteRenderer.flipX = true;
+			_hitBox.transform.localPosition = new Vector2(-offsetX, _hitBox.transform.localPosition.y);
 		}
+	
 	}
 
 	private void HandleMovementAndAnimation()
