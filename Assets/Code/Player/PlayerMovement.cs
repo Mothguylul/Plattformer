@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
 	private SpriteRenderer playerSpriteRenderer;
 	private Rigidbody2D playerRigidBody;
 	private Animator playerAnimator;
-	private TrailRenderer _playerTrailrenderer;
+	//private TrailRenderer _playerTrailrenderer;
 
 	[Header("Movement")]
 	private bool isGround;
@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
 	private float xdirection;
 
 	[Header("Dashing")]
-	[SerializeField] private float _dashingVelocity = 20f, dashingTime = 0.35f, dashingCooldown;
+	[SerializeField] private float _dashingVelocity = 20f, dashingTime = 0.45f, dashingCooldown;
 	private Vector2 _dashingDirection;
 	private bool _canDash = true, _isDashing;
 
@@ -30,68 +30,43 @@ public class PlayerMovement : MonoBehaviour
 		playerRigidBody = GetComponent<Rigidbody2D>();
 		playerSpriteRenderer = GetComponent<SpriteRenderer>();
 		playerAnimator = GetComponent<Animator>();
-		_playerTrailrenderer = GetComponent<TrailRenderer>();
+		//_playerTrailrenderer = GetComponent<TrailRenderer>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
 		xdirection = Input.GetAxisRaw("Horizontal");
-		var dashingInput = Input.GetButtonDown("Dash");
 		dashingCooldown -= Time.deltaTime;
+		var dashingInput = Input.GetButtonDown("Dash");
 
+
+		HandleJumping();
+		HandleMovementAndAnimation();
+		SpriteFlipping();	
+		
 		//dashing
 		if (dashingInput && _canDash && dashingCooldown <= 0)
 		{
-			_isDashing = true;
 			_canDash = false;
+			_isDashing = true;
 			_dashingDirection = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-			if (_dashingDirection == Vector2.zero)
-			{
-				_dashingDirection = new Vector2(0, 0);
-			}
 			StartCoroutine(StopDashing());
 		}
 
 		if (_isDashing)
 		{
 			playerRigidBody.velocity = _dashingDirection.normalized * _dashingVelocity;
-			_playerTrailrenderer.emitting = true;
+			//_playerTrailrenderer.emitting = true;
 			return;
-
 		}
 
 		if (isGround) { _canDash = true; }
+	}
 
-		// handle jumping
-		if (Input.GetKeyDown(KeyCode.Space))
-		{
-			if (isGround)
-			{
-				playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, 5);
-
-			}
-			if (canDoubleJump)
-			{
-				playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, 5);
-				canDoubleJump = false;
-
-			}
-		}
-
-		if(playerRigidBody.velocity.y > -0.01f && Input.GetMouseButtonDown(0))
-		{
-			return;
-		}
-
-		// handle left and right movement	
-		playerRigidBody.velocity = new Vector2(xdirection * speed, playerRigidBody.velocity.y);
-
-		playerAnimator.SetBool("isRunning", xdirection != 0);	
-		playerAnimator.SetFloat("yVelocity", playerRigidBody.velocity.y);
-
-		//handle sprite flipping
+	private void SpriteFlipping()
+	{
 		if (xdirection > 0.01)
 		{
 			playerSpriteRenderer.flipX = false;
@@ -99,6 +74,28 @@ public class PlayerMovement : MonoBehaviour
 		else if (xdirection < -0.01)
 		{
 			playerSpriteRenderer.flipX = true;
+		}
+	}
+
+	private void HandleMovementAndAnimation()
+	{
+		playerRigidBody.velocity = new Vector2(xdirection * speed, playerRigidBody.velocity.y);
+
+		playerAnimator.SetBool("isRunning", xdirection != 0);
+		playerAnimator.SetFloat("yVelocity", playerRigidBody.velocity.y);
+
+	}
+
+	private void HandleJumping()
+	{
+		if (Input.GetKeyDown(KeyCode.Space))
+		{
+			if (isGround || canDoubleJump)
+			{
+				playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, 5);
+
+				if (!isGround) canDoubleJump = false;
+			}
 		}
 
 	}
@@ -110,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
 		dashingCooldown = 1.25f;
 		_isDashing = false;
 		yield return new WaitForSeconds(0.2f);
-		_playerTrailrenderer.emitting = false;
+		//_playerTrailrenderer.emitting = false;
 	}
 
 	// ground management
